@@ -13,6 +13,18 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Get the series owned by the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function series(): HasMany
+    {
+        return $this->hasMany(Serie::class, 'owner_id');
+    }
+
+
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
