@@ -15,6 +15,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Hidden;
 use App\Filament\Resources\SerieResource\RelationManagers\ChaptersRelationManager;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+
 
 class SerieResource extends Resource
 {
@@ -100,5 +104,21 @@ class SerieResource extends Resource
         ];
     }
 
-    public static function getTableQuery(): Builder { return Auth::user()->series(); }
+    public static function getTableQuery(): Builder 
+    {
+        if (auth()->user()->hasRole('super_admin')) {
+            return parent::getTableQuery();
+        }
+        
+        return auth()->user()->series()->getQuery();
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        if (auth()->user()->hasRole('super_admin')) {
+            return parent::getEloquentQuery();
+        }
+        
+        return auth()->user()->series()->getQuery();
+    }
 }
