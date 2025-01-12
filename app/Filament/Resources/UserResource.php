@@ -22,6 +22,11 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->can('view_user');
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -38,6 +43,12 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->hiddenOn('edit'),
+                Forms\Components\Select::make('roles')
+                    ->multiple()
+                    ->relationship('roles', 'name')
+                    ->preload()
+                    ->searchable()
+                    ->required()
             ]);
     }
 
@@ -47,6 +58,10 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('email'),
+                Tables\Columns\TextColumn::make('roles')
+                    ->badge()
+                    ->color('success')
+                    ->formatStateUsing(fn ($record) => $record->roles->pluck('name')->join(', '))
             ])
             ->filters([
                 //
