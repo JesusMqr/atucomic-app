@@ -18,6 +18,7 @@ use App\Filament\Resources\SerieResource\RelationManagers\ChaptersRelationManage
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
 
 
 class SerieResource extends Resource
@@ -35,10 +36,29 @@ class SerieResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('title')->columnSpanFull(),
-                Forms\Components\Textarea::make('description')->columnSpanFull(),
-                Forms\Components\TextInput::make('cover_image_url'),
-                Forms\Components\TextInput::make('banner_image_url'),
+                Forms\Components\TextInput::make('title')->columnSpanFull()->label('Título')->required(),
+                Forms\Components\Textarea::make('description')->columnSpanFull()->label('Descripción'),
+                Forms\Components\TextInput::make('cover_image_url')->label('Imagen url portada')->required(),
+                Forms\Components\TextInput::make('banner_image_url')->label('Imagen url banner'),
+                Forms\Components\Select::make('type')
+                    ->label('Tipo')
+                    ->required()
+                    ->options([
+                        'manga' => 'Manga',
+                        'manhwa' => 'Manhwa', 
+                        'comic' => 'Comic',
+                        'other' => 'Otro'
+                    ]),
+                Forms\Components\Select::make('status')
+                    ->label('Estado')
+                    ->required()
+                    ->options([
+                        'ongoing' => 'En emisión',
+                        'completed' => 'Completado',
+                        'hiatus' => 'En pausa',
+                        'cancelled' => 'Cancelado'
+                    ]),
+                Forms\Components\TextInput::make('author')->label('Autor'),
                 Hidden::make('owner_id')->default(Auth::id()),
             ]);
     }
@@ -52,8 +72,52 @@ class SerieResource extends Resource
                 Tables\Columns\ImageColumn::make('cover_image_url'),
                 Tables\Columns\TextColumn::make('chapters_count')->counts('chapters'),
                 Tables\Columns\TextColumn::make('updated_at')->dateTime('Y-m-d'),
+                Tables\Columns\TextColumn::make('status')
+                    ->formatStateUsing(function ($state) {
+                        return match ($state) {
+                            'ongoing' => 'En emisión',
+                            'completed' => 'Completado',
+                            'hiatus' => 'En pausa', 
+                            'cancelled' => 'Cancelado',
+                            default => $state
+                        };
+                    })
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'ongoing' => 'success',
+                        'completed' => 'info',
+                        'hiatus' => 'warning',
+                        'cancelled' => 'danger',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('type')
+                    ->formatStateUsing(function ($state) {
+                        return match ($state) {
+                            'manga' => 'Manga',
+                            'manhwa' => 'Manhwa',
+                            'comic' => 'Comic',
+                            'other' => 'Otro',
+                            default => $state
+                        };
+                    }),
+                
+                Tables\Columns\TextColumn::make('author'),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('type')
+                    ->options([
+                        'manga' => 'Manga',
+                        'manhwa' => 'Manhwa', 
+                        'comic' => 'Comic',
+                        'other' => 'Otro'
+                    ]),
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'ongoing' => 'En emisión',
+                        'completed' => 'Completado', 
+                        'hiatus' => 'En pausa',
+                        'cancelled' => 'Cancelado'
+                    ]),
                 Tables\Filters\SelectFilter::make('updated_at')
                     ->options([
                         'desc' => 'Most Recent',
@@ -120,5 +184,17 @@ class SerieResource extends Resource
         }
         
         return auth()->user()->series()->getQuery();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()->hasRole('super_admin') || 
+        $record->owner_id === auth()->user()->id;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()->hasRole('super_admin') || 
+        $record->owner_id === auth()->user()->id;
     }
 }
