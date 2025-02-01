@@ -13,6 +13,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\ChapterResource\RelationManagers\ImagesRelationManager;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
+
+
+
+
 class ChapterResource extends Resource
 {
     protected static ?string $model = Chapter::class;
@@ -70,5 +77,23 @@ class ChapterResource extends Resource
             'create' => Pages\CreateChapter::route('/create'),
             'edit' => Pages\EditChapter::route('/{record}/edit'),
         ];
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()->hasRole('super_admin') ||
+        $record->serie->owner_id === auth()->user()->id;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()->hasRole('super_admin') ||
+        $record->serie->owner_id === auth()->user()->id;
+    }
+
+    public static function canShow(Model $record):bool
+    {
+        return auth()->user()->hasRole('super_admin') ||
+        $record->serie->owner_id === auth()->user()->id;
     }
 }

@@ -20,7 +20,9 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
+
+    protected static ?string $navigationLabel = 'Usuarios';
 
     public static function shouldRegisterNavigation(): bool
     {
@@ -91,4 +93,6 @@ class UserResource extends Resource
             'edit' => Pages\EditUser::route('/{record}/edit')
         ];
     }
+
+    
 }
