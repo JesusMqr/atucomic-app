@@ -21,7 +21,9 @@ class SerieCollection extends ResourceCollection
                 'attributes'=>[
                     'title'=>$serie->title,
                     'image'=>$serie->cover_image_url,
-                    'updated_at'=>$serie->updated_at
+                    'updated_at'=>$serie->updated_at,
+                    'status'=>$serie->status,
+                    'type'=> $serie->type,
                 ]
             ];
         })->toArray();

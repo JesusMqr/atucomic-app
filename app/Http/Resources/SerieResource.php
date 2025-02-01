@@ -20,9 +20,14 @@ class SerieResource extends JsonResource
             'attributes'=>[
                 'title'=>$this->title,
                 'description'=>$this->description,
-                'image'=>$this->banner_image_url,
+                'banner_image'=>$this->banner_image_url,
+                'cover_image'=>$this->cover_image_url,
                 'author' =>$this->owner->name,
                 'updated_at'=>$this->updated_at,
+                'total_chapters'=>$this->chapters->count(),
+                'type'=>$this->type,
+                'status'=>$this->status,
+
             ],
             'relationships'=>[
                 'chapters'=>new ChapterCollection($this->chapters)

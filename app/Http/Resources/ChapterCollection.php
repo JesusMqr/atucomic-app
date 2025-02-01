@@ -21,6 +21,7 @@ class ChapterCollection extends ResourceCollection
                 'attributes'=>[
                     'order'=>$chapter->order_number,
                     'created_at'=>$chapter->created_at,
+                    'cover_image'=>$chapter->image_url,
                 ]
             ];
         })->toArray();
